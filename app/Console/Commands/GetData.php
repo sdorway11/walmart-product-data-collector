@@ -52,7 +52,16 @@ class GetData extends Command
                 continue;
             }
 
-            $apiTools->parseItemData($data);
+            $historyIds = $apiTools->parseItemData($data);
+
+            foreach ($historyIds as $id => $historyId) {
+
+                $results = $apiTools->getReviewData($id);
+
+                $apiTools->parseReviewData($results, $historyIds);
+
+            }
+
         }
 
         $apiTools->deleteUpcs($upcs);

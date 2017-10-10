@@ -13,17 +13,17 @@ class DashboardController extends Controller
     //
     public function index() {
         $columns = [
-            'upc',
-            'item_id',
-            'parent_item_id',
-            'name',
-            'msrp',
-            'sale_price',
-            'stock',
-            'customer_rating',
-            'updated_at'
-
+            'upc' => 'UPC',
+            'item_id' => 'ITEM ID',
+            'parent_item_id' => 'PARENT ITEM ID',
+            'name' => 'NAME',
+            'msrp' => 'MSRP',
+            'sale_price' => 'SALE PRICE',
+            'stock' => 'STOCK',
+            'customer_rating' => 'CUSTOMER RATING',
+            'updated_at' => 'LAST UPDATED'
         ];
+
         $products =  DB::table('products')->paginate(10);;
 
         return view('home', ['products' => $products, 'columns' => $columns]);
@@ -32,16 +32,15 @@ class DashboardController extends Controller
     public function searchData(SearchRequest $request) {
 
         $columns = [
-            'upc',
-            'item_id',
-            'parent_item_id',
-            'name',
-            'msrp',
-            'sale_price',
-            'stock',
-            'customer_rating',
-            'updated_at'
-
+            'upc' => 'UPC',
+            'item_id' => 'ITEM ID',
+            'parent_item_id' => 'PARENT ITEM ID',
+            'name' => 'NAME',
+            'msrp' => 'MSRP',
+            'sale_price' => 'SALE PRICE',
+            'stock' => 'STOCK',
+            'customer_rating' => 'CUSTOMER RATING',
+            'updated_at' => 'LAST UPDATED'
         ];
 
         $search = $request->search;

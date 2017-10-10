@@ -19,6 +19,10 @@ Route::get('/', 'DashboardController@index');
 
 Route::get('add', 'ProductDataController@index')->name('add');
 
+Route::get('images', 'ProductDataController@images')->name('images');
+
+Route::get('/images/{id}', 'ProductDataController@image')->name('image');
+
 Route::get('/product/{id}', 'ProductDataController@product')->name('product');
 
 Route::get('/graph/{id}', 'ProductDataController@graphData')->name('graph');

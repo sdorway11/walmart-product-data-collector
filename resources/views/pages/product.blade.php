@@ -26,5 +26,13 @@
             </div>
         </a>
     </div>
+    <br>
+    <div class="container">
+        <a href="/images/{{$products[0]->item_id}}">
+            <div class="btn btn-primary col-lg-12 img-rounded text-center" >
+                Show Product Images
+            </div>
+        </a>
+    </div>
     @include("partials/_products", ['products'=> $products, 'columns' => $columns])
 @endsection

@@ -5,6 +5,7 @@ namespace App\Classes;
 
 
 
+use App\Models\Image;
 use App\Models\Product;
 use App\Models\ProductHistory;
 use App\Models\Upc;
@@ -84,16 +85,31 @@ class ApiTools
 
         $client = new Client();
 
-        try {
-            $res = $client->get($base_url, ['query' => $data]);
+        $reattempt = false;
+        $attempts = 0;
 
-            $result = json_decode($res->getBody()->getContents());
+        do {
 
-        } catch (\Exception $e) {
-            echo $e->getMessage();
+            try {
 
-            $result = "No Data";
-        }
+                $res = $client->get($base_url, ['query' => $data]);
+
+                $result = json_decode($res->getBody()->getContents());
+
+            } catch (\Exception $e) {
+
+                if ($e->getCode() != '404') {
+
+                    $attempts++;
+
+                    if ($attempts > 5) {
+                        sleep(1);
+                        $reattempt = true;
+                    }
+                }
+                $result = "No Data";
+            }
+        } while ($reattempt);
 
         return $result;
     }
@@ -116,7 +132,7 @@ class ApiTools
         $client = new Client();
 
         $attempts = 0;
-        $reattempt = true;
+        $reattempt = false;
 
         do {
 
@@ -132,16 +148,18 @@ class ApiTools
 
                 $result = "No Data";
 
-                $attempts ++;
+                if ($e->getCode() != '404') {
 
-                echo "\nThrottled ". $attempts. "\n";
+                    $attempts++;
 
-                if ($attempts > 5) {
-                    $reattempt = false;
+                    if ($attempts > 5) {
+                        sleep(1);
+                        $reattempt = true;
+                    }
                 }
             }
 
-        } while ($reattempt == true);
+        } while ($reattempt);
 
         return $result;
     }
@@ -263,6 +281,9 @@ class ApiTools
      */
     public function saveProductData($productData) {
 
+        $itemId = $productData['item_id'];
+        $images = [];
+
         $columns = Schema::getColumnListing('products');
 
         $product = Product::firstOrNew(['item_id' => $productData['item_id']]);
@@ -273,10 +294,55 @@ class ApiTools
             if (in_array($key, $columns)) {
 
                 $product->$key = $value;
+
+            }
+
+            if ($key == 'image_entities') {
+
+                foreach ($value as $imageData) {
+
+                    $parsedImageData = $this->parseImageData($imageData);
+
+                    $images[] = $parsedImageData;
+
+                }
+
             }
         }
 
         $product->save();
+
+        $this->saveImageData($itemId, $images);
+
+    }
+
+    public function saveImageData($itemId, $imageData) {
+
+        $productId = Product::where('item_id', $itemId)->value('id');
+
+        foreach ($imageData as $data) {
+
+            Image::updateOrCreate([
+                'product_id' => $productId,
+                'entity_type' => $data['entity_type'],
+                'thumbnail_image' => $data['thumbnail_image'],
+                'medium_image' => $data['medium_image'],
+                'large_image' => $data['large_image']
+            ]);
+        }
+    }
+
+    public function parseImageData($imageData) {
+
+        $data = [];
+
+        foreach ($imageData as $key => $value) {
+
+            $keyColumn = strtolower(preg_replace('/(?<!\ )[A-Z]/', '_$0', $key));
+            $data[$keyColumn] = $value;
+        }
+
+        return $data;
 
     }
 

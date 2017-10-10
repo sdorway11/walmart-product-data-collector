@@ -20,4 +20,13 @@ class Product extends Model
      * @var array
      */
     protected $fillable = ['item_id'];
+
+    /**
+     * Get images this has
+     */
+    public function images()
+    {
+        return $this->hasMany('App\Models\Image');
+    }
+
 }

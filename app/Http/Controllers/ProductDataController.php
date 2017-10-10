@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Classes\ApiTools;
 use App\Http\Requests\UpcRequest;
+use App\Models\Product;
 use App\Models\ProductHistory;
 use Illuminate\Support\Facades\DB;
 use Khill\Lavacharts\Lavacharts;
@@ -16,6 +17,40 @@ class ProductDataController extends Controller
 
     public function index() {
         return view('pages.add');
+    }
+
+    public function images() {
+
+        $columns = [
+            'item_id' => 'ITEM ID',
+            'thumbnail' => 'THUMBNAIL IMAGE',
+            'medium' => 'MEDIUM IMAGE',
+            'large' => 'LARGE IMAGE'
+        ];
+
+        $imageData = DB::select("SELECT p.upc, p.item_id, GROUP_CONCAT(i.thumbnail_image SEPARATOR '|') as thumbnail, 
+                GROUP_CONCAT(i.medium_image SEPARATOR '|') as `medium`,
+                GROUP_CONCAT(i.large_image SEPARATOR '|') as large
+                FROM products p 
+                INNER JOIN images i ON i.product_id = p.id
+                GROUP BY p.item_id, p.upc");
+
+
+        return view('pages.images', ['products' => $imageData, 'columns' => $columns]);
+    }
+
+    public function image($id) {
+
+        $imageData = DB::select("SELECT p.name, p.upc, p.item_id, GROUP_CONCAT(i.thumbnail_image SEPARATOR '|') as thumbnail, 
+                GROUP_CONCAT(i.medium_image SEPARATOR '|') as `medium`,
+                GROUP_CONCAT(i.large_image SEPARATOR '|') as large
+                FROM products p 
+                INNER JOIN images i ON i.product_id = p.id
+                WHERE p.item_id = ?
+                GROUP BY p.name, p.item_id, p.upc", [$id]);
+
+        return view('pages.image', ['product' => $imageData[0]]);
+
     }
 
     public function storeUpcs(UpcRequest $request) {
@@ -33,15 +68,15 @@ class ProductDataController extends Controller
     public function product($id) {
 
         $columns = [
-            'upc',
-            'parent_item_id',
-            'name',
-            'msrp',
-            'sale_price',
-            'number_of_reviews',
-            'average_rating',
-            'stock',
-            'updated_at'
+            'upc' => 'UPC',
+            'item_id' => 'ITEM ID',
+            'parent_item_id' => 'PARENT ITEM ID',
+            'name' => 'NAME',
+            'msrp' => 'MSRP',
+            'sale_price' => 'SALE PRICE',
+            'stock' => 'STOCK',
+            'customer_rating' => 'CUSTOMER RATING',
+            'updated_at' => 'LAST UPDATED'
         ];
 
         $productData = ProductHistory::where('item_id', $id)->orderBy('id', 'desc') ->get();
