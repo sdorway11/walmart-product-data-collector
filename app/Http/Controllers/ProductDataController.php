@@ -22,6 +22,7 @@ class ProductDataController extends Controller
     public function images() {
 
         $columns = [
+            'upc' => 'UPC',
             'item_id' => 'ITEM ID',
             'thumbnail' => 'THUMBNAIL IMAGE',
             'medium' => 'MEDIUM IMAGE',
@@ -34,7 +35,6 @@ class ProductDataController extends Controller
                 FROM products p 
                 INNER JOIN images i ON i.product_id = p.id
                 GROUP BY p.item_id, p.upc");
-
 
         return view('pages.images', ['products' => $imageData, 'columns' => $columns]);
     }

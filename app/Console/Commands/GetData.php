@@ -58,7 +58,11 @@ class GetData extends Command
 
                 $results = $apiTools->getReviewData($id);
 
-                $apiTools->parseReviewData($results, $historyIds);
+                if ($results != 'No Data') {
+
+                    $apiTools->parseReviewData($results, $historyIds);
+
+                }
 
             }
 
